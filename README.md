@@ -1,6 +1,6 @@
 Here's the complete README, ready to commit:
 
-``markdown
+``1markdown
 Azure Cost Optimization: HA Web Infrastructure
 
 Project Overview
@@ -62,5 +62,3 @@ After Cleanup
 - screenshots/after/09-public-ip-list-empty.png - CLI output confirming zero public IPs remain.
 - screenshots/after/11-resource-group-cleaned.png - Resource group overview showing the NAT Gateway and public IPs removed.
 `
-
-Push this to the Azure-Cost-Optimization` repo whenever ready. Monitoring and observability project kicks off Monday.
