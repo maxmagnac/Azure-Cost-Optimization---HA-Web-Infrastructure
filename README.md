@@ -48,20 +48,20 @@ Public IP addresses and NAT Gateways carry hourly charges independent of actual 
 ### Before Cleanup
 
 
-- `screenshots/before/01-public-ips-before-cleanup.png` - All public IPs listed in `ha-web-infrastructure-rg` prior to removal.
-- `screenshots/before/03-nat-gateway-cli-output.png` - CLI output confirming the NAT Gateway's active state.
-- `screenshots/before/04-cost-analysis-dashboard.png` - Cost Analysis dashboard showing estimated charges.
-- `screenshots/before/vm-status-before-cleanup.png` - Virtual machine status before any changes.
-- `screenshots/before/vnet-subnet-configuration.png` - VNet and subnet configuration showing outbound access settings.
+- ```screenshots/before/01-public-ips-before-cleanup.png` - All public IPs listed in `ha-web-infrastructure-rg` prior to removal.
+- ```screenshots/before/03-nat-gateway-cli-output.png` - CLI output confirming the NAT Gateway's active state.
+- ```screenshots/before/04-cost-analysis-dashboard.png` - Cost Analysis dashboard showing estimated charges.
+- ```screenshots/before/vm-status-before-cleanup.png` - Virtual machine status before any changes.
+- ```screenshots/before/vnet-subnet-configuration.png` - VNet and subnet configuration showing outbound access settings.
 
 
 ### After Cleanup
 
 
 
-- `screenshots/after/10-aks-cluster-stopped.png` - AKS cluster shown in a Stopped state.
-- `screenshots/after/09-public-ip-list-empty.png` - CLI output confirming zero public IPs remain.
-- `screenshots/after/11-resource-group-cleaned.png` - Resource group overview showing the NAT Gateway and public IPs removed.
+- ```screenshots/after/10-aks-cluster-stopped.png` - AKS cluster shown in a Stopped state.
+- ```screenshots/after/09-public-ip-list-empty.png` - CLI output confirming zero public IPs remain.
+- ```screenshots/after/11-resource-group-cleaned.png` - Resource group overview showing the NAT Gateway and public IPs removed.
 
 
 
