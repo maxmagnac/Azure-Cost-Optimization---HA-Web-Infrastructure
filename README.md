@@ -1,7 +1,4 @@
-Here's the complete README, ready to commit:
-
-``1markdown
-Azure Cost Optimization: HA Web Infrastructure
+# Azure Cost Optimization: HA Web Infrastructure
 
 Project Overview
 
