@@ -47,20 +47,40 @@ Public IP addresses and NAT Gateways carry hourly charges independent of actual 
 
 ### Before Cleanup
 
-**Public IPs before removal**  
+* **Public IPs Before Cleanup**  
+  All public IPs listed in `ha-web-infrastructure-rg` prior to removal.  
+  ![Public IPs Before Cleanup](screenshots/before/01-public-ips-before-cleanup.png)
 
-**NAT Gateway active state**  
+* **NAT Gateway CLI Output**  
+  CLI output confirming the NAT Gateway's active state.  
+  ![NAT Gateway CLI Output](screenshots/before/03-nat-gateway-cli-output.png)
 
-**Cost Analysis dashboard**  
+* **Cost Analysis Dashboard**  
+  Cost Analysis dashboard showing estimated charges.  
+  ![Cost Analysis Dashboard](screenshots/before/04-cost-analysis-dashboard.png)
 
-**VM status before cleanup**  
+* **VM Status Before Cleanup**  
+  Virtual machine status before any changes.  
+  ![VM Status Before Cleanup](screenshots/before/vm-status-before-cleanup.png)
 
-**VNet and subnet configuration**  
+* **VNet and Subnet Configuration**  
+  VNet and subnet configuration showing outbound access settings.  
+  ![VNet Subnet Configuration](screenshots/before/vnet-subnet-configuration.png)
+
+---
 
 ### After Cleanup
 
-**AKS cluster stopped**  
+* **AKS Cluster Stopped**  
+  AKS cluster shown in a Stopped state.  
+  ![AKS Cluster Stopped](screenshots/after/10-aks-cluster-stopped.png)
 
-**Public IP list empty**  
+* **Public IP List Empty**  
+  CLI output confirming zero public IPs remain.  
+  ![Public IP List Empty](screenshots/after/09-public-ip-list-empty.png)
 
-**Resource group cleaned** 
+* **Resource Group Cleaned**  
+  Resource group overview showing the NAT Gateway and public IPs removed.  
+  ![Resource Group Cleaned](screenshots/after/11-resource-group-cleaned.png)
+
+
