@@ -1,167 +1,66 @@
-# Azure-Cost-Optimization---HA-Web-Infrastructure
-Azure Cost Optimization - HA Web Infrastructure
+Here's the complete README, ready to commit:
 
-Overview
+``markdown
+Azure Cost Optimization: HA Web Infrastructure
 
-This project documents a cost analysis and remediation effort performed on an Azure-hosted high-availability web infrastructure. The audit identified and eliminated unnecessary billable resources that accumulated during active development, resulting in significant monthly cost savings.
+Project Overview
 
-Project Context
+This project documents a cost optimization initiative for a high-availability web infrastructure hosted on Azure. The infrastructure runs inside the ha-web-infrastructure-rg resource group and includes virtual machines, a virtual network with public and private subnets, an AKS cluster, and supporting network resources.
 
-The ha-web-infrastructure-rg resource group hosted a high-availability web application built with:
-
-- Two Linux virtual machines across availability zones
-- An Azure Load Balancer
-- An AKS (Azure Kubernetes Service) cluster
-- A NAT Gateway
-- Public IP addresses attached to VM NICs
-- A Virtual Network with subnets
-
-During active development, several resources continued running and billing after their immediate need passed. This audit targeted those resources for cleanup.
+The goal centers on identifying unnecessary costs within the resource group and eliminating them without disrupting the core infrastructure design.
 
 Problem Statement
 
-Azure charges for the following resources even when idle or unused:
+Azure Cost Management flagged rising charges tied to resources that ran continuously without active use. A NAT Gateway operated around the clock, generating hourly charges regardless of traffic volume. Multiple public IP addresses sat allocated to resources, some idle, each accruing a standard hourly rate. The AKS cluster ran at full capacity during periods when the workload didn't require it.
 
-- Running virtual machines (compute + OS disk)
-- AKS node pool VMs
-- NAT Gateway (hourly + data processing fees)
-- Public IP addresses (dynamic and static, whether attached or not)
-- Load Balancer rules
-
-Left unaddressed, these resources accumulate hundreds of dollars in monthly charges with zero business value during non-production periods.
+Together, these resources drove up the monthly bill well beyond what the actual usage justified.
 
 Cost Analysis
 
-| Resource | Type | Estimated Monthly Cost |
-|---|---|---|
-| AKS Cluster (1 node pool) | Compute | ~$140-180 |
-| NAT Gateway | Networking | ~$32-45 |
-| vm-web-01 | Standard B-series VM | ~$30-60 |
-| vm-web-02 | Standard B-series VM | ~$30-60 |
-| Public IP - vm-web-01 | Static Public IP | ~$3.65 |
-| Public IP - vm-web-02 | Static Public IP | ~$3.65 |
-| Load Balancer | Standard tier | ~$18-22 |
-| Total (estimated) | | ~$257-374/month |
+| Resource | Type | Status Before | Estimated Monthly Cost |
+|---|---|---|---|
+| ha-web-nat-gateway | NAT Gateway | Running 24/7 | ~$32/month |
+| Public IP addresses | Standard SKU | Multiple allocated | ~$3-4/month each |
+| AKS cluster | Kubernetes cluster | Running continuously | Variable, node-pool dependent |
+| Virtual machines | vm-web-01, vm-web-02, vm-db-01 | Running | Variable |
+
+The Cost Analysis dashboard in Azure Portal confirmed these charges accumulating daily, with the NAT Gateway and public IPs representing steady, avoidable spend.
 
 Remediation Steps
 
-Step 1 - Audit Existing Public IPs
-
-Listed all public IPs in the resource group to identify orphaned or unnecessary addresses:
-
-``bash
-az network public-ip list --resource-group ha-web-infrastructure-rg --output table
-`
-
-Step 2 - Stop the AKS Cluster
-
-Stopped the AKS cluster to eliminate node pool compute charges during non-production periods:
-
-`bash
-az aks stop --resource-group ha-web-infrastructure-rg --name <aks-cluster-name>
-`
-
-Step 3 - Delete the NAT Gateway
-
-Removed the NAT Gateway, which billed hourly regardless of traffic volume:
-
-`bash
-az network nat gateway delete --resource-group ha-web-infrastructure-rg --name <nat-gateway-name>
-`
-
-Step 4 - Detach Public IPs from VM NICs
-
-Removed public IP associations from both VM network interface configurations:
-
-VM Web 01:
-`bash
-az network nic ip-config update \
- --resource-group ha-web-infrastructure-rg \
- --nic-name vm-web-01<nic-suffix> \
- --name ipconfig1 \
- --remove publicIpAddress
-`
-
-VM Web 02:
-`bash
-az network nic ip-config update \
- --resource-group ha-web-infrastructure-rg \
- --nic-name vm-web-02596_z2 \
- --name ipconfig1 \
- --remove publicIpAddress
-`
-
-Step 5 - Delete Orphaned Public IP Resources
-
-Deleted the standalone public IP resources after detaching them from NICs:
-
-`bash
-az network public-ip delete --resource-group ha-web-infrastructure-rg --name vmweb01ip<suffix>
-
-az network public-ip delete --resource-group ha-web-infrastructure-rg --name vmweb02ip702
-`
-
-Step 6 - Verify Cleanup
-
-Confirmed zero public IPs remain in the resource group:
-
-`bash
-az network public-ip list --resource-group ha-web-infrastructure-rg --output table
-`
+1. Audited public IP addresses - Ran az network public-ip list --resource-group ha-web-infrastructure-rg -o table to identify every public IP tied to the resource group, including ones attached to kubernetes, ha-load-balancer, and individual VMs.
+2. Reviewed the NAT Gateway configuration - Ran az network nat gateway list --resource-group ha-web-infrastructure-rg -o table to confirm the gateway's status, location, and idle timeout settings before removal.
+3. Verified subnet dependencies - Checked az network vnet subnet list output to confirm which subnets relied on the NAT Gateway for outbound access before deleting it.
+4. Stopped the AKS cluster - Deallocated the cluster through the Azure Portal to eliminate compute charges during idle periods.
+5. Deleted the NAT Gateway - Removed ha-web-nat-gateway after confirming no active dependencies required it.
+6. Removed unused public IP addresses - Deleted the IPs no longer tied to active services.
+7. Re-ran the public IP audit - Confirmed the resource group returned an empty result, verifying complete cleanup.
 
 Results
 
-- All orphaned public IP resources removed from the resource group
-- AKS cluster stopped, eliminating node pool compute billing
-- NAT Gateway deleted, eliminating hourly networking charges
-- VM NICs cleaned up with no public exposure
-- Infrastructure remains intact and ready for redeployment when needed
+The final audit confirmed the NAT Gateway and all flagged public IP addresses no longer exist in ha-web-infrastructure-rg. The resource group overview page shows only the VMs, virtual network, logs, and alert rules that support the active infrastructure. The AKS cluster sits in a stopped state, ready to restart when the workload calls for it.
+
+This cleanup removes recurring charges tied to idle networking resources and continuous cluster uptime, translating to a measurable reduction in the monthly Azure bill.
+
+Lessons Learned
+
+Public IP addresses and NAT Gateways carry hourly charges independent of actual traffic, making regular audits essential for cost control. Stopping an AKS cluster during idle periods preserves the cluster configuration while eliminating compute costs. The Azure CLI provides fast, repeatable verification steps that complement the Portal's visual confirmation, giving stronger proof of both the problem and the fix.
 
 Screenshots
 
 Before Cleanup
-| Screenshot | File |
-|---|---|
-| Public IPs listed in resource group | screenshots/before/01-public-ips-before-cleanup.png |
-| AKS cluster in Running state | screenshots/before/02-aks-cluster-running.png |
-| NAT Gateway present in resource group | screenshots/before/03-nat-gateway-present.png |
-| Cost Analysis dashboard | screenshots/before/04-cost-analysis-dashboard.png |
+- screenshots/before/01-public-ips-before-cleanup.png - All public IPs listed in ha-web-infrastructure-rg prior to removal.
+- screenshots/before/03-nat-gateway-cli-output.png - CLI output confirming the NAT Gateway's active state.
+- screenshots/before/04-cost-analysis-dashboard.png - Cost Analysis dashboard showing estimated charges.
+- screenshots/before/vm-status-before-cleanup.png - Virtual machine status before any changes.
+- screenshots/before/vnet-subnet-configuration.png - VNet and subnet configuration showing outbound access settings.
 
-During Cleanup
-| Screenshot | File |
-|---|---|
-| Public IP audit terminal output | screenshots/during/05-public-ip-audit-output.png |
-| NIC detach command - VM Web 01 | screenshots/during/06-nic-detach-vm-web-01.png |
-| NIC detach command - VM Web 02 | screenshots/during/07-nic-detach-vm-web-02.png |
-| Public IP delete commands output | screenshots/during/08-public-ip-delete-commands.png |
+During Remediation
+- screenshots/during/10-aks-cluster-stopped.png - AKS cluster shown in a Stopped state.
 
 After Cleanup
-| Screenshot | File |
-|---|---|
-| Public IP list showing empty results | screenshots/after/09-public-ip-list-empty.png |
-| AKS cluster in Stopped state | screenshots/after/10-aks-cluster-stopped.png |
-| Resource group with cleanup confirmed | screenshots/after/11-resource-group-cleaned.png |
+- screenshots/after/09-public-ip-list-empty.png - CLI output confirming zero public IPs remain.
+- screenshots/after/11-resource-group-cleaned.png - Resource group overview showing the NAT Gateway and public IPs removed.
+`
 
-Key Takeaways
-
-- Azure bills for public IPs even when detached from resources - always delete them explicitly after removing the association
-- AKS node pools continue billing until the cluster reaches a stopped state - stopping the cluster fully is the correct action
-- NAT Gateways carry a flat hourly charge regardless of usage volume - remove them during non-production periods
-- Regular resource audits using az CLI list commands catch billing leaks before they compound
-
-Tools Used
-
-- Azure CLI (az)
-- Azure Portal (verification)
-- Resource Group: ha-web-infrastructure-rg`
-
-Author
-
-Maurrin Carter
-Cloud Infrastructure Engineer
-GitHub: [your-github-handle]
-
-Related Projects
-
-- HA Web Infrastructure (link-to-repo)
-- Azure Monitoring & Alerting (coming Monday)
+Push this to the Azure-Cost-Optimization` repo whenever ready. Monitoring and observability project kicks off Monday.
